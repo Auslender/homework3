@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
         <service android:name=".ImageLoadService"/>
-        <receiver android:name=".OrientationReceiver"/>
+        <receiver android:name=".StateReciever"/>
     </application>
 
 </manifest>

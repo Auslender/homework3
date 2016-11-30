@@ -28,7 +28,7 @@ public class ImageLoadService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("INTENTSERVICE", "StateReciever Created");
+        Log.d("INTENTSERVICE", "Started");
     }
 
     class ILBinder extends Binder {
@@ -59,6 +59,7 @@ public class ImageLoadService extends IntentService {
             while ((bufferLength = in.read(buffer)) > 0) {
                 out.write(buffer, 0, bufferLength);
             }
+            sendBroadcast(new Intent(MainActivity.UPDATE));
             out.close();
         } catch (MalformedURLException e) {
             e.printStackTrace();

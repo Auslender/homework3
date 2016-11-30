@@ -2,11 +2,13 @@ package android_2016.ifmo.ru.imageloader;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -23,12 +25,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_URL = "image_url";
     public static final String KEY_NAME = "file_name";
     public static final String myfile = "myfile.jpg";
+    public static final String UPDATE = "NEW_BROADCAST";
 
     ImageView image;
     TextView error;
     ImageLoadService myService;
 
-    private BroadcastReceiver sr;
+    private BroadcastReceiver sr, u;
     boolean isBounded = false;
 
     private ServiceConnection isConnected = new ServiceConnection() {
@@ -44,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("ONCREATE", "Called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -53,6 +57,20 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(getApplicationContext(), ImageLoadService.class);
         getApplicationContext().bindService(i, isConnected, BIND_AUTO_CREATE);
 
+        openImage();
+
+        u = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                openImage();
+            }
+        };
+        sr = new StateReciever();
+        registerReceiver(sr, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        registerReceiver(u, new IntentFilter(UPDATE));
+    }
+
+    private void openImage() {
         File f = new File(Environment.getExternalStorageDirectory(), myfile);
         if (f.exists()) {
             Log.d("File EXISTS", f.getPath());
@@ -64,16 +82,13 @@ public class MainActivity extends AppCompatActivity {
             image.setVisibility(View.INVISIBLE);
             error.setVisibility(View.VISIBLE);
         }
-
-        sr = new OrientationReceiver();
-        IntentFilter orientationBR = new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
-        registerReceiver(sr, orientationBR);
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d("MAINACTIVITY", "DESTROYED");
         unregisterReceiver(sr);
+        unregisterReceiver(u);
     }
+
 }
